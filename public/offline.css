@@ -1,0 +1,61 @@
+/* Styles for offline.html. A separate file so no inline <style> is needed and
+   the Content-Security-Policy can stay strict. */
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  background: #f6f1e7;
+  color: #2b2118;
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  line-height: 1.6;
+}
+
+.offline {
+  max-width: 34rem;
+  background: #fffdf8;
+  border: 1px solid #ded3c0;
+  border-radius: 10px;
+  padding: 2rem;
+}
+
+h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  margin-top: 0;
+}
+
+a {
+  color: #8c2f39;
+}
+
+.offline__footer {
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: #857a6b;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #161311;
+    color: #f0e9dd;
+  }
+
+  .offline {
+    background: #211d1a;
+    border-color: #3a332c;
+  }
+
+  a {
+    color: #e79aa2;
+  }
+
+  .offline__footer {
+    color: #9c9184;
+  }
+}

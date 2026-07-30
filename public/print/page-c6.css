@@ -1,0 +1,2 @@
+/* Page size for printing directly onto a C6 envelope (162 x 114 mm). */
+@page { size: 162mm 114mm; margin: 0; }

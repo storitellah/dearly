@@ -1,0 +1,2 @@
+/* Page size for printing directly onto a C5 envelope (229 x 162 mm). */
+@page { size: 229mm 162mm; margin: 0; }

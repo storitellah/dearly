@@ -1,0 +1,75 @@
+{
+  "name": "Dearly by Storitellah",
+  "short_name": "Dearly",
+  "description": "Write what deserves to be kept. A private, offline letter-writing studio: your letters never leave your device.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "any",
+  "theme_color": "#f6f1e7",
+  "background_color": "#f6f1e7",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle", "utilities"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Write a new letter",
+      "short_name": "Write",
+      "url": "./#/write",
+      "description": "Open the writing view"
+    },
+    {
+      "name": "Memory box",
+      "short_name": "Letters",
+      "url": "./#/library",
+      "description": "Every letter you have written"
+    },
+    {
+      "name": "Print check",
+      "short_name": "Print check",
+      "url": "./#/print-check",
+      "description": "Calibrate your printer"
+    }
+  ]
+}

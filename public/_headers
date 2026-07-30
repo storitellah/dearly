@@ -1,0 +1,72 @@
+# Cloudflare Pages response headers.
+# This file is copied verbatim into dist/ by the build and applied by Cloudflare.
+#
+# The Content-Security-Policy is written around what Dearly actually does:
+#   script-src 'self'      — one bundled module, no inline script, no eval anywhere
+#   style-src  'self'      — stylesheets only, no inline <style> element
+#   style-src-attr         — the print/preview engine positions pages in real
+#                            millimetres through element style attributes; that is
+#                            data, not code, and no other inline styling is used
+#   img-src data: blob:    — locally processed photographs, previews and exports
+#   media-src blob:        — optional interface sounds
+#   connect-src 'self'     — only the optional Pages Functions on this origin
+#   worker-src 'self' blob:— the service worker, and workers created from blobs
+#   frame-ancestors 'none' — Dearly may never be framed
+# There is no 'unsafe-eval' and no 'unsafe-inline' for scripts or stylesheets.
+
+/*
+  Content-Security-Policy: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; frame-src 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Permissions-Policy: accelerometer=(), ambient-light-sensor=(), autoplay=(), browsing-topics=(), camera=(), display-capture=(), encrypted-media=(), geolocation=(), gyroscope=(), idle-detection=(), interest-cohort=(), magnetometer=(), microphone=(), midi=(), payment=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), xr-spatial-tracking=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  X-Permitted-Cross-Domain-Policies: none
+
+# Hashed build output never changes under the same name.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/icons/*
+  Cache-Control: public, max-age=604800
+
+/stationery/*
+  Cache-Control: public, max-age=604800
+
+/textures/*
+  Cache-Control: public, max-age=604800
+
+/sounds/*
+  Cache-Control: public, max-age=604800
+
+/print/*
+  Cache-Control: public, max-age=86400
+
+# The document and the service worker must always be revalidated, so an update
+# is picked up on the next visit rather than days later.
+/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
+/offline.html
+  Cache-Control: no-cache
+
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+
+/manifest.webmanifest
+  Cache-Control: public, max-age=86400
+  Content-Type: application/manifest+json
+
+# Optional Pages Functions: never cached, never framed.
+/api/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex

@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+.vite/
+*.local
+
+# Environment files (never commit real values — see .env.example)
+.env
+.env.*
+!.env.example
+
+# Editors and OS noise
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Test and tooling output
+coverage/
+.eslintcache
+*.tsbuildinfo
+
+# Cloudflare / Wrangler local state
+.wrangler/
+.dev.vars
+
+# User content must never be committed: letters, archives, exports, keys
+*.dearly
+*.dearly.json
+exports/
+letters/
+private/
+*.pem
+*.key
+*.p12
+*.pfx

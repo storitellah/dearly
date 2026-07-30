@@ -1,0 +1,2 @@
+/* Page size for printing directly onto a DL envelope (220 x 110 mm). */
+@page { size: 220mm 110mm; margin: 0; }

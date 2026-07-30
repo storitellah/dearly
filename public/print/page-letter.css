@@ -1,0 +1,2 @@
+/* Page size for US Letter printing. */
+@page { size: Letter portrait; margin: 0; }

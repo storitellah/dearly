@@ -1,0 +1,12 @@
+# Cloudflare Pages redirects.
+#
+# Dearly routes with the URL hash (#/library, #/write/<id>), so the application
+# itself needs no server rewriting. This fallback exists only so that a hand-typed
+# or bookmarked path still lands on the app instead of a 404.
+#
+# It is deliberately placed last and uses a 200 rewrite rather than a redirect.
+# Cloudflare Pages serves real files and Function routes first, so downloads,
+# assets, /api/* Functions, _headers and the service worker are never shadowed
+# by this rule.
+
+/*    /index.html   200

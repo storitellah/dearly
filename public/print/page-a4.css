@@ -1,0 +1,2 @@
+/* Page size for A4 printing. Linked at print time by the print controller. */
+@page { size: A4 portrait; margin: 0; }

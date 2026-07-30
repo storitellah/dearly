@@ -1,0 +1,11 @@
+# Dearly by Storitellah
+#
+# Nothing personal is ever served from this site: letters live in the visitor's
+# own browser. Only the application shell is public.
+#
+# Preview deployments (*.pages.dev previews and non-production branches) are also
+# marked noindex at the response level by functions/_middleware.ts.
+
+User-agent: *
+Allow: /
+Disallow: /api/

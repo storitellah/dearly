@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Woven linen texture">
+  <rect width="32" height="32" fill="#fdf0ee"/>
+  <g stroke="#f6e0dd" stroke-width="1.2" opacity="0.9">
+    <path d="M0 3h32M0 11h32M0 19h32M0 27h32"/>
+  </g>
+  <g stroke="#f8e6e3" stroke-width="1.2" opacity="0.9">
+    <path d="M3 0v32M11 0v32M19 0v32M27 0v32"/>
+  </g>
+</svg>

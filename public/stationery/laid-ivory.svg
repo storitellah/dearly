@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="Laid paper grain">
+  <rect width="48" height="48" fill="#fbf6ec"/>
+  <g stroke="#e6dcc7" stroke-width="0.6" opacity="0.85">
+    <path d="M0 4h48M0 12h48M0 20h48M0 28h48M0 36h48M0 44h48"/>
+  </g>
+  <g stroke="#efe7d6" stroke-width="0.4" opacity="0.7">
+    <path d="M6 0v48M18 0v48M30 0v48M42 0v48"/>
+  </g>
+</svg>
