@@ -1,0 +1,88 @@
+/*
+ * Print rules.
+ *
+ * The default page size is A4; the exact size for a given job is set by a small
+ * stylesheet in `public/print/` that the print controller links at print time,
+ * because `@page { size: … }` cannot be driven by a custom property.
+ *
+ * The print tree is a separate subtree (`#dearly-print-root`) that exists only
+ * while printing, so no application chrome, shadow, control or editing handle
+ * can reach the paper.
+ */
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+.print-root {
+  display: none;
+}
+
+@media print {
+  :root {
+    --font-scale: 1;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide the whole application while printing. */
+  body.is-printing > *:not(.print-root) {
+    display: none !important;
+  }
+
+  .app,
+  .toasts,
+  .dialog,
+  .skip-link {
+    display: none !important;
+  }
+
+  .print-root {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .print-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    break-after: page;
+    page-break-after: always;
+    /* Paper colours and stationery textures must survive the print pipeline. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .print-line,
+  .envelope-block {
+    orphans: 2;
+    widows: 2;
+  }
+
+  .print-image img {
+    image-rendering: auto;
+  }
+
+  a[href]::after {
+    /* Never append URLs to printed letter text. */
+    content: none !important;
+  }
+}
+
+/* On screen, the preview pages sit on a soft background. */
+@media screen {
+  .print-root .print-page {
+    margin-bottom: 12px;
+  }
+}

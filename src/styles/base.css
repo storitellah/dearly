@@ -1,0 +1,243 @@
+/*
+ * Base styles: tokens, reset, typography, themes.
+ *
+ * No remote fonts, no @import from another origin — everything here loads from
+ * this site, so the interface renders identically offline.
+ */
+
+:root {
+  --font-scale: 1;
+
+  --font-body: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-letter: Literata, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    "Times New Roman", serif;
+
+  --paper: #f6f1e7;
+  --paper-raised: #fffdf8;
+  --ink: #2b2118;
+  --ink-soft: #5d5346;
+  --ink-faint: #857a6b;
+  --line: #ded3c0;
+  --accent: #8c2f39;
+  --accent-soft: #f3e2e2;
+  --accent-ink: #ffffff;
+  --success: #2f6b4f;
+  --warning: #8a5a12;
+  --danger: #9b2226;
+  --focus: #1d4ed8;
+
+  --radius: 10px;
+  --radius-small: 6px;
+  --shadow: 0 1px 2px rgba(43, 33, 24, 0.08), 0 8px 24px rgba(43, 33, 24, 0.06);
+  --shadow-soft: 0 1px 2px rgba(43, 33, 24, 0.06);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --duration: 180ms;
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --paper: #161311;
+  --paper-raised: #211d1a;
+  --ink: #f0e9dd;
+  --ink-soft: #c9bfb0;
+  --ink-faint: #9c9184;
+  --line: #3a332c;
+  --accent: #e79aa2;
+  --accent-soft: #38262a;
+  --accent-ink: #1a1315;
+  --success: #7fc9a3;
+  --warning: #e2b262;
+  --danger: #f08a8d;
+  --focus: #93c5fd;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4);
+
+  color-scheme: dark;
+}
+
+:root[data-theme="contrast"] {
+  --paper: #ffffff;
+  --paper-raised: #ffffff;
+  --ink: #000000;
+  --ink-soft: #1a1a1a;
+  --ink-faint: #333333;
+  --line: #000000;
+  --accent: #6b0f16;
+  --accent-soft: #ffffff;
+  --accent-ink: #ffffff;
+  --success: #14532d;
+  --warning: #663c00;
+  --danger: #7f1d1d;
+  --focus: #0000ff;
+  --shadow: none;
+  --shadow-soft: none;
+
+  color-scheme: light;
+}
+
+:root[data-motion="reduced"] {
+  --duration: 0ms;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/*
+ * `hidden` is used throughout for state that is genuinely absent (an empty
+ * banner, a resolved error). Component classes set `display`, which would
+ * otherwise beat the user-agent rule for [hidden].
+ */
+[hidden] {
+  display: none !important;
+}
+
+html {
+  font-size: calc(100% * var(--font-scale));
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-letter);
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 0 var(--space-3);
+  color: var(--ink);
+}
+
+h1 {
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem);
+}
+
+h2 {
+  font-size: clamp(1.2rem, 1.05rem + 0.7vw, 1.5rem);
+}
+
+h3 {
+  font-size: 1.05rem;
+}
+
+p {
+  margin: 0 0 var(--space-3);
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+ul,
+ol {
+  margin: 0 0 var(--space-3);
+  padding-inline-start: 1.2rem;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-small);
+}
+
+/* Never remove focus rings; only make them consistent. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -3rem;
+  left: var(--space-3);
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  background: var(--paper-raised);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-small);
+  transition: top var(--duration) ease;
+}
+
+.skip-link:focus {
+  top: var(--space-3);
+}
+
+.boot {
+  padding: var(--space-6);
+  color: var(--ink-faint);
+}
+
+.noscript {
+  max-width: 40rem;
+  margin: var(--space-7) auto;
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+}
+
+.prose {
+  max-width: 44rem;
+  margin-bottom: var(--space-6);
+}
+
+.prose h2 {
+  margin-top: var(--space-5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

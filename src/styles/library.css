@@ -1,0 +1,143 @@
+/* The memory box. */
+
+.library-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-4);
+  align-items: flex-end;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  margin-bottom: var(--space-4);
+}
+
+.library-summary {
+  color: var(--ink-faint);
+  font-size: 0.88rem;
+}
+
+.letter-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--space-4);
+}
+
+.letter-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-soft);
+}
+
+.letter-card__link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.letter-card__title {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.letter-card__link:hover .letter-card__title {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.letter-card__meta {
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+.letter-card__preview {
+  font-family: var(--font-letter);
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.letter-card__preview--empty {
+  font-style: italic;
+  color: var(--ink-faint);
+}
+
+.letter-card__locked {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 0;
+}
+
+.letter-card__facts {
+  list-style: none;
+  padding: 0;
+  margin: auto 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.tag-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.tag {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.letter-card__actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.letter-grid__empty {
+  grid-column: 1 / -1;
+  padding: var(--space-6);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  text-align: center;
+  color: var(--ink-faint);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.pager__status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+}
+
+.storage-report {
+  margin-bottom: var(--space-3);
+}
+
+.feedback {
+  margin-top: var(--space-4);
+}

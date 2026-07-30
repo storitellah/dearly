@@ -1,0 +1,368 @@
+/*
+ * Paper, envelopes and the calibration sheet.
+ *
+ * These rules describe a physical page in millimetres and are used both by the
+ * on-screen preview and by the printed output, so the preview is not an
+ * approximation — it is the same markup.
+ */
+
+.print-page {
+  position: relative;
+  overflow: hidden;
+  background: var(--paper-colour, #fbf6ec);
+  color: var(--ink-colour, #2b2118);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.print-page__paper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.print-page--textured .print-page__paper {
+  background-image: var(--paper-texture);
+  background-size: var(--texture-tile) var(--texture-tile);
+  background-repeat: repeat;
+  opacity: 0.85;
+}
+
+.print-page--lined .print-page__paper,
+.print-page--grid .print-page__paper,
+.print-page--dotted .print-page__paper {
+  background-position: var(--margin-left) var(--margin-top);
+}
+
+.print-page--lined .print-page__paper {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--ruling-step) - 0.2mm),
+    var(--ruling-colour) calc(var(--ruling-step) - 0.2mm),
+    var(--ruling-colour) var(--ruling-step)
+  );
+}
+
+.print-page--grid .print-page__paper {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--ruling-step) - 0.2mm),
+      var(--ruling-colour) calc(var(--ruling-step) - 0.2mm),
+      var(--ruling-colour) var(--ruling-step)
+    ),
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(var(--ruling-step) - 0.2mm),
+      var(--ruling-colour) calc(var(--ruling-step) - 0.2mm),
+      var(--ruling-colour) var(--ruling-step)
+    );
+}
+
+.print-page--dotted .print-page__paper {
+  background-image: radial-gradient(var(--ruling-colour) 0.3mm, transparent 0.3mm);
+  background-size: var(--ruling-step) var(--ruling-step);
+}
+
+.print-page--border-hairline .print-page__paper,
+.print-page--border-double .print-page__paper,
+.print-page--border-deckled .print-page__paper {
+  border: 0.4mm solid var(--border-colour);
+  margin: 6mm;
+  inset: 0;
+}
+
+.print-page--border-double .print-page__paper {
+  box-shadow: inset 0 0 0 1.4mm var(--paper-colour), inset 0 0 0 1.8mm var(--border-colour);
+}
+
+.print-page--border-deckled .print-page__paper {
+  border-style: dashed;
+}
+
+.print-page__content {
+  position: absolute;
+  inset: 0;
+}
+
+.print-line {
+  position: absolute;
+  margin: 0;
+  white-space: pre;
+  line-height: 1.15;
+  font-variant-ligatures: common-ligatures;
+}
+
+.print-line--justify,
+.print-line[style*="justify"] {
+  white-space: normal;
+}
+
+.print-line__filler {
+  display: inline-block;
+  width: 100%;
+  height: 0;
+}
+
+.print-line--meta {
+  opacity: 0.9;
+}
+
+.print-line--caption {
+  opacity: 0.85;
+}
+
+.print-image {
+  position: absolute;
+  overflow: hidden;
+}
+
+.print-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.print-page__number {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 8.5pt;
+  opacity: 0.7;
+  color: var(--ink-colour);
+}
+
+.print-guide {
+  position: absolute;
+  pointer-events: none;
+}
+
+.print-guide--fold {
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 0.2mm dashed rgba(0, 0, 0, 0.28);
+  clip-path: polygon(0 0, 6mm 0, 6mm 100%, 0 100%, 0 0, 100% 0, 100% 100%, calc(100% - 6mm) 100%, calc(100% - 6mm) 0, 100% 0);
+}
+
+.print-guide--cut {
+  width: 6mm;
+  height: 6mm;
+  border: 0 solid rgba(0, 0, 0, 0.4);
+}
+
+.print-guide--cut-tl {
+  top: 4mm;
+  left: 4mm;
+  border-top-width: 0.2mm;
+  border-left-width: 0.2mm;
+}
+
+.print-guide--cut-tr {
+  top: 4mm;
+  right: 4mm;
+  border-top-width: 0.2mm;
+  border-right-width: 0.2mm;
+}
+
+.print-guide--cut-bl {
+  bottom: 4mm;
+  left: 4mm;
+  border-bottom-width: 0.2mm;
+  border-left-width: 0.2mm;
+}
+
+.print-guide--cut-br {
+  bottom: 4mm;
+  right: 4mm;
+  border-bottom-width: 0.2mm;
+  border-right-width: 0.2mm;
+}
+
+.print-page--blank {
+  background: #fff;
+  box-shadow: none;
+}
+
+/* Envelopes --------------------------------------------------------------- */
+
+.print-page--envelope {
+  background: #fffdf8;
+}
+
+.envelope-outline {
+  position: absolute;
+  border: 0.3mm dashed rgba(0, 0, 0, 0.35);
+  border-radius: 1mm;
+}
+
+.envelope-outline--hidden {
+  border-color: transparent;
+}
+
+.envelope-block {
+  position: absolute;
+  white-space: pre-wrap;
+  line-height: 1.35;
+}
+
+.envelope-block__line {
+  display: block;
+}
+
+.envelope-block--sender,
+.envelope-block--stamp,
+.envelope-block--note {
+  opacity: 0.9;
+}
+
+.envelope-seal {
+  position: absolute;
+  width: 22mm;
+  height: 22mm;
+  border-radius: 50%;
+  background: var(--seal-colour, #8c2f39);
+  opacity: 0.9;
+}
+
+.envelope-seal--sticker {
+  border-radius: 2mm;
+}
+
+.envelope-seal--ribbon {
+  width: 40mm;
+  height: 6mm;
+  border-radius: 1mm;
+}
+
+.envelope-cut {
+  position: absolute;
+  width: 4mm;
+  height: 4mm;
+  border-top: 0.2mm solid rgba(0, 0, 0, 0.5);
+  border-left: 0.2mm solid rgba(0, 0, 0, 0.5);
+  transform: translate(-2mm, -2mm);
+}
+
+/* Calibration ------------------------------------------------------------- */
+
+.print-page--calibration {
+  background: #fff;
+  color: #111;
+  font-family: var(--font-body);
+}
+
+.calibration {
+  position: absolute;
+  inset: 14mm;
+}
+
+.calibration__title {
+  font-size: 16pt;
+  margin: 0 0 2mm;
+}
+
+.calibration__intro,
+.calibration__note {
+  font-size: 9pt;
+  max-width: 150mm;
+}
+
+.calibration__heading {
+  font-size: 10pt;
+  margin: 6mm 0 2mm;
+}
+
+.calibration__rule {
+  position: relative;
+  height: 12mm;
+  border-bottom: 0.3mm solid #111;
+  margin-bottom: 6mm;
+}
+
+.calibration__tick {
+  position: absolute;
+  bottom: 0;
+  width: 0.2mm;
+  height: 3mm;
+  background: #111;
+}
+
+.calibration__tick--major {
+  height: 7mm;
+  width: 0.3mm;
+}
+
+.calibration__label {
+  position: absolute;
+  bottom: 7.5mm;
+  font-size: 7pt;
+  transform: translateX(-50%);
+}
+
+.calibration__sample {
+  margin: 0 0 1.5mm;
+}
+
+.calibration__ramp {
+  display: flex;
+  gap: 0;
+  height: 10mm;
+  margin-bottom: 4mm;
+}
+
+.calibration__swatch {
+  flex: 1 1 auto;
+  border: 0.2mm solid #111;
+}
+
+.calibration__corner {
+  position: absolute;
+  width: 8mm;
+  height: 8mm;
+  border: 0 solid #111;
+}
+
+.calibration__corner--tl {
+  top: 10mm;
+  left: 10mm;
+  border-top-width: 0.3mm;
+  border-left-width: 0.3mm;
+}
+
+.calibration__corner--tr {
+  top: 10mm;
+  right: 10mm;
+  border-top-width: 0.3mm;
+  border-right-width: 0.3mm;
+}
+
+.calibration__corner--bl {
+  bottom: 10mm;
+  left: 10mm;
+  border-bottom-width: 0.3mm;
+  border-left-width: 0.3mm;
+}
+
+.calibration__corner--br {
+  bottom: 10mm;
+  right: 10mm;
+  border-bottom-width: 0.3mm;
+  border-right-width: 0.3mm;
+}
+
+.calibration__footer {
+  position: absolute;
+  bottom: 8mm;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 8pt;
+  color: #444;
+}
