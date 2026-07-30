@@ -1,0 +1,61 @@
+name: Feature request
+description: Suggest something Dearly should be able to do
+title: "[Idea]: "
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas are welcome. Dearly has a deliberately narrow shape, so the most
+        useful suggestions explain the letter-writing problem behind them.
+
+        Two things will not be added, whatever the benefit: anything that sends
+        letter content off the device by default, and anything that requires an
+        account.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the situation, not the solution.
+      placeholder: I write to my grandmother every month and retype the same opening each time.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+      validations:
+        required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of Dearly?
+      options:
+        - Writing
+        - The memory box
+        - Stationery and typography
+        - Photographs or signatures
+        - Printing and envelopes
+        - Export and backup
+        - Privacy and encryption
+        - Accessibility
+        - Something else
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Does it fit how Dearly works?
+      options:
+        - label: This can work entirely on the device, with no server and no account.
+        - label: This works offline.
+        - label: I am not sure — please advise.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What do you do instead today?

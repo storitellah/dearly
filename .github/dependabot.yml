@@ -1,0 +1,42 @@
+# Dependabot keeps the (development-only) dependency tree current.
+# Dearly has no runtime dependencies, so these updates affect the build and
+# test tooling only.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "build"
+      include: scope
+    groups:
+      # One pull request for routine development-tooling bumps.
+      dev-tooling:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # Major upgrades are deliberate work, not an automatic pull request.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: "ci"

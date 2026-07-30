@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/storitellah/dearly/security/advisories/new
+    about: Report privately. Never open a public issue for a security problem.
+  - name: Email Storitellah
+    url: mailto:hello@storitellah.com
+    about: Questions, feedback, or anything you would rather not post publicly.
+  - name: Privacy and data questions
+    url: https://github.com/storitellah/dearly/blob/main/PRIVACY.md
+    about: Where letters are stored, what leaves the device, and how backups work.

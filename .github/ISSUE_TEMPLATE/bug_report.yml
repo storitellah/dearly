@@ -1,0 +1,105 @@
+name: Bug report
+description: Something in Dearly does not work as it should
+title: "[Bug]: "
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report this.
+
+        **Please do not include a real letter, a real password or anyone's
+        personal data.** Reproduce the problem with test content instead.
+
+        If this is a security vulnerability, do not open an issue — email
+        hello@storitellah.com. See SECURITY.md.
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before you post
+      options:
+        - label: This report contains no personal letters, addresses or passwords.
+          required: true
+        - label: I have searched existing issues for the same problem.
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+      placeholder: I clicked Print, and the envelope printed but the letter did not.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of Dearly?
+      options:
+        - Writing and autosave
+        - The memory box
+        - Stationery and typography
+        - Photographs or signatures
+        - Printing
+        - Export (PDF, images, text, HTML)
+        - Backup and restore
+        - Encryption and locking
+        - Offline or installing the app
+        - Accessibility
+        - Something else
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Safari 18.2 on iPhone, iOS 18.3
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device and operating system
+      placeholder: MacBook Air M2, macOS 15.3
+
+  - type: input
+    id: version
+    attributes:
+      label: Dearly version
+      description: Shown in Settings → About this build.
+      placeholder: 1.0.0
+
+  - type: textarea
+    id: printer
+    attributes:
+      label: If this is a printing problem
+      description: Printer make and model, paper size, margin settings, and what the Print check sheet measured.
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console output
+      description: Any errors from the browser console. Dearly never logs letter text, so this is safe to paste.
+      render: text
+
+  - type: checkboxes
+    id: data
+    attributes:
+      label: Did you lose any data?
+      options:
+        - label: A letter or its text was lost or corrupted (this is treated as urgent).

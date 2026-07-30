@@ -1,0 +1,79 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check the deployable output
+        run: |
+          set -euo pipefail
+          for file in \
+            dist/index.html \
+            dist/offline.html \
+            dist/manifest.webmanifest \
+            dist/sw.js \
+            dist/_headers \
+            dist/_redirects \
+            dist/robots.txt \
+            dist/icons/icon-512.png \
+            dist/icons/maskable-512.png \
+            dist/print/page-a4.css
+          do
+            test -f "$file" || { echo "Missing from the build: $file"; exit 1; }
+          done
+          echo "All required files are present."
+
+      - name: Check that no secret was inlined into the bundle
+        run: |
+          set -euo pipefail
+          if grep -rIl -E '(AI_API_KEY|FEEDBACK_WEBHOOK_URL|sk-[A-Za-z0-9]{16,})' dist/; then
+            echo "A server-side secret name or key-shaped string appears in the build output."
+            exit 1
+          fi
+          echo "No secrets found in dist/."
+
+      - name: Report bundle size
+        run: |
+          echo "### Build output" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          du -sh dist >> "$GITHUB_STEP_SUMMARY"
+          ls -lh dist/assets >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist
+          retention-days: 7
