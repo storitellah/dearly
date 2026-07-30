@@ -22,6 +22,7 @@ tracking. Install it, go offline, keep writing.
 - [Production build](#production-build)
 - [Push to GitHub](#push-to-github)
 - [Deploy to Cloudflare Pages](#deploy-to-cloudflare-pages)
+- [Troubleshooting a deployment](#troubleshooting-a-deployment)
 - [Custom domain](#custom-domain)
 - [Environment variables](#environment-variables)
 - [Offline architecture](#offline-architecture)
@@ -221,6 +222,71 @@ data is never touched, because there is no shared storage to touch. Printing,
 exporting and offline use all work in a preview exactly as they do in production.
 
 Production never depends on a preview deployment.
+
+## Troubleshooting a deployment
+
+### The page shows "Dearly is starting…" and nothing else
+
+The application never started. After a few seconds the page explains this
+itself, on the page, with the fix — but here is the same information.
+
+**Almost always: the host is serving the project source instead of the build
+output.** `index.html` in the repository root loads `/src/main.ts`, which is
+TypeScript. A browser cannot run it, so nothing starts and no stylesheet is ever
+applied — which is why the page is also completely unstyled.
+
+Check the Pages project settings match exactly:
+
+| Setting | Value |
+| --- | --- |
+| Framework preset | `Vite` |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Root directory | `/` |
+
+If the build command is empty, or the output directory is `/` rather than
+`dist`, Cloudflare publishes the repository as-is and you get this symptom.
+Correct the settings and redeploy — **Deployments → the latest deployment →
+Retry deployment** picks up the new configuration.
+
+To confirm which one you are serving, open the deployed page's source. A correct
+deployment references a hashed bundle:
+
+```html
+<script type="module" crossorigin src="/assets/index.<hash>.js"></script>
+<link rel="stylesheet" crossorigin href="/assets/index.<hash>.css">
+```
+
+A source deployment references `/src/main.ts` instead. CI checks this on every
+build, so a green `build` workflow means the output itself is correct.
+
+### It works locally but not when deployed
+
+- Open the browser console. A 404 for a file under `/assets/` means the deployed
+  output is incomplete — trigger a fresh deployment rather than a retry.
+- Check the deployment log for a failed `npm ci` or `npm run build`. Pages will
+  happily publish an empty or partial directory after a failed build.
+- Confirm Node 20 or newer is being used; `engines` in `package.json` declares it.
+
+### Opening `index.html` from the file system does nothing
+
+That is expected — it is a source file, not a built page. Run `npm run dev` for
+development, or `npm run build && npm run preview` to try the production build.
+
+### The old version keeps coming back
+
+The service worker serves the previous build until you accept the update. Reload
+once and accept the *A new version of Dearly is ready* notice, or clear the site
+data. Deployment does not force an update on someone mid-letter, by design.
+
+### Letters have disappeared
+
+Letters are stored per site address. Moving from `*.pages.dev` to a custom
+domain, or between browsers or devices, starts a fresh local library — the old
+letters are still under the old address. Export a `.dearly` backup there and
+import it on the new one. Clearing site data deletes them permanently; only a
+backup file can bring them back.
+
 
 ## Custom domain
 

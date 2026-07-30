@@ -7,7 +7,20 @@ this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- A deployment that served the project source instead of `dist/` produced a
+  blank, unstyled page with no explanation: `index.html` loads `/src/main.ts`,
+  which a browser cannot execute, so neither the application nor its styles ever
+  arrived. The page now explains the cause and the fix on the page itself, in a
+  linked stylesheet that applies even when the bundle fails to load, revealed
+  only if start-up has not completed after eight seconds.
+- Hardened `public/_redirects` so the single-page fallback can never shadow a
+  real file. Every directory holding assets, plus the service worker and the
+  optional Function routes, is now mapped to itself ahead of the catch-all.
+- The build workflow now fails if the built HTML still references the TypeScript
+  source, so a broken deployment is caught in CI rather than in production.
+- The boot stylesheet is precached, so a cold offline start is styled.
 
 ## [1.0.0] — 2026-07-30
 

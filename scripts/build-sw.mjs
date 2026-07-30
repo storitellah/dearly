@@ -31,6 +31,8 @@ const EXCLUDE = [
 const PRECACHE_PATTERNS = [
   /^index\.html$/,
   /^offline\.html$/,
+  /^boot\.css$/,
+  /^offline\.css$/,
   /^manifest\.webmanifest$/,
   /^assets\/.*\.(js|css)$/,
   /^icons\/.*\.(png|svg|ico)$/,

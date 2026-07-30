@@ -54,6 +54,22 @@ jobs:
           done
           echo "All required files are present."
 
+      - name: Check the build actually ran
+        run: |
+          set -euo pipefail
+          # A deploy that serves the project source instead of dist/ shows a
+          # blank page, because /src/main.ts cannot run in a browser. Catch it
+          # here rather than in production.
+          if grep -q 'src="/src/' dist/index.html; then
+            echo "dist/index.html still points at the TypeScript source — the build did not run."
+            exit 1
+          fi
+          grep -qE 'src="[^"]*/assets/[^"]+\.js"' dist/index.html \
+            || { echo "dist/index.html does not reference a built script."; exit 1; }
+          grep -qE 'href="[^"]*/assets/[^"]+\.css"' dist/index.html \
+            || { echo "dist/index.html does not reference the built stylesheet."; exit 1; }
+          echo "Built HTML references the built assets."
+
       - name: Check that no secret was inlined into the bundle
         run: |
           set -euo pipefail

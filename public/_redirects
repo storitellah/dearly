@@ -1,12 +1,31 @@
 # Cloudflare Pages redirects.
 #
 # Dearly routes with the URL hash (#/library, #/write/<id>), so the application
-# itself needs no server rewriting. This fallback exists only so that a hand-typed
-# or bookmarked path still lands on the app instead of a 404.
+# itself needs no server-side rewriting at all. The final rule exists only so a
+# hand-typed or bookmarked path lands on the app instead of a bare 404.
 #
-# It is deliberately placed last and uses a 200 rewrite rather than a redirect.
-# Cloudflare Pages serves real files and Function routes first, so downloads,
-# assets, /api/* Functions, _headers and the service worker are never shadowed
-# by this rule.
+# The self-rewrites above it are deliberate belt and braces. A catch-all that
+# shadowed a real asset would serve index.html in place of the JavaScript and
+# CSS bundles, and the app would never start — so every directory holding real
+# files is mapped to itself first, and cannot be swallowed by the catch-all
+# regardless of how rule precedence is evaluated.
 
-/*    /index.html   200
+/assets/*       /assets/:splat        200
+/icons/*        /icons/:splat         200
+/stationery/*   /stationery/:splat    200
+/textures/*     /textures/:splat      200
+/sounds/*       /sounds/:splat        200
+/fonts/*        /fonts/:splat         200
+/print/*        /print/:splat         200
+/sw.js          /sw.js                200
+/boot.css       /boot.css             200
+/offline.css    /offline.css          200
+/offline.html   /offline.html         200
+/manifest.webmanifest  /manifest.webmanifest  200
+/robots.txt     /robots.txt           200
+
+# Optional Pages Functions must reach their handlers, never the app shell.
+/api/*          /api/:splat           200
+
+# Last resort only.
+/*              /index.html           200

@@ -26,6 +26,9 @@
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
     <link rel="canonical" href="" id="canonical-url" />
+    <!-- Boot styling, linked rather than bundled so it still applies when the
+         application bundle fails to load. See public/boot.css. -->
+    <link rel="stylesheet" href="./boot.css" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Dearly by Storitellah" />
@@ -42,7 +45,40 @@
   </head>
   <body>
     <div id="app" class="app-root">
-      <p class="boot">Dearly is starting…</p>
+      <div class="boot">
+        <p class="boot__message">Dearly is starting…</p>
+        <!--
+          Only ever seen if the application has not started after a few seconds.
+          A healthy start-up replaces this whole block first.
+        -->
+        <div class="boot__diagnostic" role="status">
+          <h1>Dearly has not started</h1>
+          <p>
+            The page loaded, but the application did not. That almost always means the built
+            files are not the ones being served.
+          </p>
+          <ul>
+            <li>
+              <strong>On a deployed site:</strong> the host is serving the project source instead
+              of the build output. Set the build command to <code>npm run build</code> and the
+              build output directory to <code>dist</code>, then deploy again.
+            </li>
+            <li>
+              <strong>Opened from your computer:</strong> this file cannot run on its own. Run
+              <code>npm install</code> and then <code>npm run dev</code>, and open the address it
+              prints.
+            </li>
+            <li>
+              <strong>Otherwise:</strong> open your browser's developer console. A failed request
+              for a file under <code>/assets/</code> points at a missing or misconfigured deploy.
+            </li>
+          </ul>
+          <p class="boot__note">
+            Nothing has been lost. Letters are stored in this browser and are not affected by a
+            failed page load. Full instructions are in the project README.
+          </p>
+        </div>
+      </div>
     </div>
     <noscript>
       <div class="noscript">
