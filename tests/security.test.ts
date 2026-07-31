@@ -196,8 +196,8 @@ describe('routes and links', () => {
       id: 'ltr_00aa11bb22cc',
     });
     expect(parseRoute('#/write/<script>')).toEqual({ name: 'write', id: null });
-    expect(parseRoute('#/nonsense')).toEqual({ name: 'library', id: null });
-    expect(parseRoute('')).toEqual({ name: 'library', id: null });
+    expect(parseRoute('#/nonsense')).toEqual({ name: 'home', id: null });
+    expect(parseRoute('')).toEqual({ name: 'home', id: null });
     expect(routeToHash({ name: 'settings', id: null })).toBe('#/settings');
   });
 

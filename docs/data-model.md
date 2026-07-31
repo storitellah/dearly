@@ -1,6 +1,6 @@
 # The local data model
 
-Defined in `src/components/storage/schema.ts`. Current schema version: **2**.
+Defined in `src/components/storage/schema.ts`. Current schema version: **3**.
 
 ## A letter
 
@@ -19,7 +19,12 @@ interface LetterRecord {
                                  // apology | milestone | future-self |
                                  // farewell | everyday | other
   status: LetterStatus;          // draft | ready | printed | sent | kept | archived
-  body: string;                  // plain text; paragraphs separated by blank lines
+  body: string;                  // plain text mirror of `doc`, kept for search,
+                                 // plain-text export and older builds
+  doc: LetterDocument;           // the structured document the page renders
+  templateId: string | null;     // the template it started from, if any
+  themeId: string | null;        // the colour theme it was written in
+  paperSize: PageSizeId;         // a4 | letter | a5 | a6 | square | postcard
   stationeryId: string;
   typography: TypographySettings;
   envelope: EnvelopeSettings;
@@ -153,6 +158,11 @@ Every read goes through `migrateLetter` (`storage/migrations.ts`).
 | From | To | What changes |
 | --- | --- | --- |
 | 1 | 2 | `text` → `body`; `paper` → `stationeryId`; envelope, signature, attachments and tags added with defaults |
+| 2 | 3 | `doc` built from the existing `body`, one paragraph per blank-line-separated block, so no words are lost; `templateId`, `themeId` and `paperSize` added with defaults |
+
+`body` is still written on every save, derived from `doc`. It is what search
+matches, what the plain-text export produces, and what an older build would show
+if a letter travelled backwards through a `.dearly` file.
 
 Three rules that must not be broken:
 
@@ -166,17 +176,46 @@ Three rules that must not be broken:
 Adding a version:
 
 ```ts
-const stepV2toV3: Step = (raw) => {
+const stepV3toV4: Step = (raw) => {
   const next = { ...raw };
   next.newField = deriveFrom(next);
-  next.schemaVersion = 3;
+  next.schemaVersion = 4;
   return next;
 };
 
-const STEPS: Record<number, Step> = { 1: stepV1toV2, 2: stepV2toV3 };
+const STEPS: Record<number, Step> = { 1: stepV1toV2, 2: stepV2toV3, 3: stepV3toV4 };
 ```
 
 then bump `CURRENT_SCHEMA_VERSION` in `schema.ts`.
+
+## The letter document
+
+Defined in `src/components/document/model.ts`. This is what the page renders and
+what the editor reads back after every change.
+
+```ts
+interface LetterDocument {
+  version: number;
+  blocks: Block[];            // the flowing body of the letter
+  decorations: Decoration[];  // stickers and notes, positioned in millimetres
+}
+
+type Block = TextBlock | ListBlock | RuleBlock | PhotoBlock;
+type Decoration = StickerDecoration | NoteDecoration;
+```
+
+Two rules hold the whole thing together:
+
+1. **Every document is normalised before it is stored or rendered.**
+   `normaliseDocument` clamps sizes, drops unknown block and mark types, strips
+   control characters, and refuses any href that is not `http`, `https` or
+   `mailto`.
+2. **Rendering never touches `innerHTML`.** `render.ts` builds nodes with
+   `createElement` and writes text with `textContent`, so a document loaded from
+   an imported archive cannot execute anything.
+
+Decoration positions are millimetres from the top-left of the paper, which is
+why a sticker lands in the same place on the page as it does on the screen.
 
 ## Preferences (localStorage)
 

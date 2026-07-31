@@ -9,35 +9,68 @@ index.html
   └── src/main.ts            imports styles, boots the app, catches boot failures
         └── src/app.ts       shell + hash router + view lifecycle
               ├── ui/shell.ts          header, nav, banners, footer
+              ├── ui/home-view.ts      the mailbox, the six big actions
               ├── ui/library-view.ts   the memory box
-              ├── editor/editor-view.ts the writing view (and its panels)
+              ├── ui/templates-view.ts the template gallery
+              ├── ui/sticker-studio-view.ts  browse, favourite and make stickers
+              ├── editor/desk-view.ts  the letter desk: the page and its trays
               ├── ui/settings-view.ts  preferences, storage, backups
               ├── ui/privacy-view.ts   the privacy screen
               └── ui/calibration-view.ts print check
 ```
 
+The desk is built from four pieces that do not know about each other:
+
+```text
+editor/desk-view.ts            owns the letter, the trays and the dock
+  ├── editor/wysiwyg/page-view.ts        the paper you type on; pagination
+  ├── editor/wysiwyg/toolbar.ts          the floating formatting bar
+  ├── editor/wysiwyg/slash-menu.ts       "/" commands
+  └── editor/wysiwyg/decoration-layer.ts dragging, resizing, rotating stickers
+```
+
+All four speak the same language: a `LetterDocument` in, a `LetterDocument` out.
+None of them mutate the document in place — they hand a new one to `apply`,
+which commits it to the single undo history and queues an autosave.
+
 There is no framework and no global store. Each view is a function that returns
 `{ element, dispose? }`. `app.ts` creates one at a time and disposes the previous
 one, which is what keeps object URLs, listeners and canvases from accumulating.
 
-The one piece of shared mutable state is `EditorContext`
-(`src/components/editor/context.ts`): it owns the letter being written, its
-attachments and the autosave queue. Panels read from it and call `update()`.
-There is no other way to change a letter, so autosave cannot be bypassed.
+The desk owns the letter being written. `setLetter` is the only place its copy
+changes, and it always queues an autosave, so a save cannot be skipped by
+accident. The three panels that predate the desk — locking, draft history and
+signatures — reach the same letter through `EditorContext`
+(`src/components/editor/context.ts`), which the desk keeps in step in both
+directions: `replace` pushes the desk's changes in, and the `change` event
+brings a panel's changes back out.
 
 ## Data flow when you type
 
+There is no textarea. The keystroke lands on the page itself, and the page is
+read back into the model:
+
 ```text
-textarea input
-  → EditorContext.update({ body })
-      → Autosave.queue(letter)            debounced, 800 ms
-          → putLetter(letter)             IndexedDB transaction
-              → status: "Saved locally"   only after the transaction commits
-          → saveSnapshot(letter)          rate-limited recovery snapshot
-      → events.emit('change')
-          → preview panel re-renders (debounced)
-          → other panels re-sync their fields
+input on the contenteditable page
+  → parseDocument(flow, previous)     DOM → LetterDocument, allow-list only
+      → applyDoc(doc)
+          → DocumentHistory.commit()  one stack; consecutive typing coalesces
+          → Autosave.queue(letter)    debounced, 800 ms
+              → putLetter(letter)     IndexedDB transaction
+                  → status: "Saved locally"  only after the transaction commits
+              → saveSnapshot(letter)  rate-limited recovery snapshot
+  → measurePages()                    debounced; pushes straddling blocks over
 ```
+
+Note the direction. The page is not re-rendered from the model on every
+keystroke — that would fight the caret. The model is read *from* the page, and
+the page is only rebuilt when something other than typing changes it: a
+formatting command, a sticker, a template, an undo.
+
+One exception is written down deliberately in `decoration-layer.ts`: while a
+finger is still down, the model is updated but the page is **not** rebuilt, and
+the dragged element is moved directly. Replacing the element mid-gesture
+cancels the touch that is holding it.
 
 The status is derived from the storage operation, never from the intention to
 save. If the transaction fails, the status becomes *Unable to save*, the letter
@@ -117,7 +150,8 @@ while there is unsaved work.
 if it needs one. Everything else — preview, print, PDF, export — follows.
 
 **A new export format:** add a module under `src/components/export/`, and wire a
-button in `editor/export-panel.ts` behind a dynamic `import()`.
+button into `buildExportTray` in `editor/desk-view.ts` behind a dynamic
+`import()`.
 
 **A new letter field:** add it to `LetterRecord` and `normaliseLetter` in
 `storage/schema.ts`, bump `CURRENT_SCHEMA_VERSION`, add a migration step in

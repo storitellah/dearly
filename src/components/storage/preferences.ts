@@ -22,6 +22,20 @@ export interface Preferences {
   /** Explicit opt-in for the optional AI assistant. Default off. */
   aiAssistEnabled: boolean;
   libraryPageSize: number;
+  /** Colour theme last chosen, applied on launch. */
+  lastThemeId: string;
+  /** Slash commands in the writing surface. */
+  slashCommands: boolean;
+  /** Writing prompts shown on the desk. */
+  showPrompts: boolean;
+  /** The prompt most recently offered, so it is not repeated immediately. */
+  lastPrompt: string;
+  /** Decorative background patterns and textures. */
+  decorations: boolean;
+  /** Favourite sticker ids. */
+  favouriteStickers: string[];
+  /** Favourite template ids. */
+  favouriteTemplates: string[];
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -37,6 +51,13 @@ export const DEFAULT_PREFERENCES: Preferences = {
   privacyAcknowledged: false,
   aiAssistEnabled: false,
   libraryPageSize: 12,
+  lastThemeId: 'bubblegum-pink',
+  slashCommands: true,
+  showPrompts: true,
+  lastPrompt: '',
+  decorations: true,
+  favouriteStickers: [],
+  favouriteTemplates: [],
 };
 
 const STORAGE_KEY = 'dearly.preferences.v1';
@@ -86,6 +107,18 @@ function coerce(input: Partial<Preferences>): Preferences {
     privacyAcknowledged: Boolean(merged.privacyAcknowledged),
     aiAssistEnabled: Boolean(merged.aiAssistEnabled),
     libraryPageSize: Math.min(48, Math.max(6, Math.trunc(Number(merged.libraryPageSize) || 12))),
+    lastThemeId:
+      typeof merged.lastThemeId === 'string' ? merged.lastThemeId.slice(0, 40) : 'bubblegum-pink',
+    slashCommands: merged.slashCommands !== false,
+    showPrompts: merged.showPrompts !== false,
+    lastPrompt: typeof merged.lastPrompt === 'string' ? merged.lastPrompt.slice(0, 200) : '',
+    decorations: merged.decorations !== false,
+    favouriteStickers: Array.isArray(merged.favouriteStickers)
+      ? merged.favouriteStickers.filter((id): id is string => typeof id === 'string').slice(0, 400)
+      : [],
+    favouriteTemplates: Array.isArray(merged.favouriteTemplates)
+      ? merged.favouriteTemplates.filter((id): id is string => typeof id === 'string').slice(0, 200)
+      : [],
   };
 }
 

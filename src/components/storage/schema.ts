@@ -9,9 +9,10 @@
 
 import { createId } from '../utilities/id';
 import { isoDate } from '../utilities/format';
+import { emptyDocument, normaliseDocument, type LetterDocument } from '../document/model';
 
 /** Bump when the shape of a stored letter changes, and add a migration step. */
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 export const LETTER_CATEGORIES = [
   'love',
@@ -106,6 +107,15 @@ export interface LetterRecord {
   category: LetterCategory;
   status: LetterStatus;
   body: string;
+  /**
+   * The structured letter, introduced in schema 3. `body` is kept in step with
+   * it as plain text so search, previews and plain-text export stay cheap.
+   */
+  doc: LetterDocument;
+  /** Template, theme and paper the letter is designed with. */
+  templateId: string;
+  themeId: string;
+  paperSize: string;
   stationeryId: string;
   typography: TypographySettings;
   envelope: EnvelopeSettings;
@@ -181,6 +191,10 @@ export function createLetter(partial: Partial<LetterRecord> = {}): LetterRecord 
     category: partial.category ?? 'everyday',
     status: partial.status ?? 'draft',
     body: partial.body ?? '',
+    doc: partial.doc ?? emptyDocument(),
+    templateId: partial.templateId ?? 'love-notes',
+    themeId: partial.themeId ?? 'bubblegum-pink',
+    paperSize: partial.paperSize ?? 'a4',
     stationeryId: partial.stationeryId ?? 'ivory-laid',
     typography: { ...DEFAULT_TYPOGRAPHY, ...partial.typography },
     envelope: { ...DEFAULT_ENVELOPE, ...partial.envelope },
@@ -314,6 +328,10 @@ export function normaliseLetter(input: unknown): LetterRecord {
     'category',
     'status',
     'body',
+    'doc',
+    'templateId',
+    'themeId',
+    'paperSize',
     'stationeryId',
     'typography',
     'envelope',
@@ -351,6 +369,14 @@ export function normaliseLetter(input: unknown): LetterRecord {
     category: asEnum(raw.category, LETTER_CATEGORIES, 'everyday'),
     status: asEnum(raw.status, LETTER_STATUSES, 'draft'),
     body: asString(raw.body),
+    doc: normaliseDocument(raw.doc),
+    templateId: asString(raw.templateId, 'love-notes').slice(0, 60),
+    themeId: asString(raw.themeId, 'bubblegum-pink').slice(0, 40),
+    paperSize: asEnum(
+      raw.paperSize,
+      ['a4', 'letter', 'a5', 'a6', 'square', 'postcard'] as const,
+      'a4',
+    ),
     stationeryId: asString(raw.stationeryId, 'ivory-laid'),
     typography: {
       family: asString(typography.family, DEFAULT_TYPOGRAPHY.family),

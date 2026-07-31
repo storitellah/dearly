@@ -101,3 +101,33 @@ describe('the service worker precache list', () => {
     expect(script).toMatch(/\^boot\\\.css\$/);
   });
 });
+
+describe('narrow screens', () => {
+  const sheets = [
+    'src/styles/joy.css',
+    'src/styles/desk.css',
+    'src/styles/editor.css',
+    'src/styles/library.css',
+    'src/styles/components.css',
+  ];
+
+  it('never lets a responsive grid grow wider than the phone it is on', async () => {
+    // `repeat(auto-fit, minmax(15rem, 1fr))` cannot fall below its floor, so on
+    // a 390px screen six 15rem columns push the whole page sideways. Wrapping
+    // the floor in `min(..., 100%)` collapses it to one full-width column.
+    for (const sheet of sheets) {
+      const css = await read(sheet);
+      const tracks = css.match(/repeat\((?:auto-fit|auto-fill),\s*minmax\([^)]*\)[^)]*\)/g) ?? [];
+      for (const track of tracks) {
+        expect.soft(track, `${sheet}: ${track}`).toContain('min(');
+        expect.soft(track, `${sheet}: ${track}`).toContain('100%');
+      }
+    }
+  });
+
+  it('constrains the home column so a wide child cannot stretch it', async () => {
+    const css = await read('src/styles/joy.css');
+    const home = /\.home\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(home).toContain('grid-template-columns: minmax(0, 1fr)');
+  });
+});
