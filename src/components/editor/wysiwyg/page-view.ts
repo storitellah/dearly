@@ -26,6 +26,7 @@ import { getPaper as getPaperDesign } from '../../templates/papers';
 import { getTemplate } from '../../templates/templates';
 import { getFont } from '../../stationery/typography';
 import { getTheme } from '../../theme/themes';
+import { paginateFlow } from './pagination';
 import { debounce } from '../../utilities/debounce';
 import { Disposables } from '../../utilities/events';
 
@@ -235,45 +236,12 @@ export class PageView {
     const pxPerMm = this.pixelsPerMm();
     if (pxPerMm <= 0) return;
 
-    const usableHeight = (this.geometry.heightMm - this.geometry.margins.top - this.geometry.margins.bottom) * pxPerMm;
+    const usableHeight =
+      (this.geometry.heightMm - this.geometry.margins.top - this.geometry.margins.bottom) * pxPerMm;
     if (usableHeight <= 0) return;
 
-    // Clear previous spacing before measuring again.
-    for (const block of Array.from(this.flow.children)) {
-      if (block instanceof HTMLElement) block.style.removeProperty('margin-top');
-    }
-
-    let pageTop = 0;
-
-    for (const child of Array.from(this.flow.children)) {
-      if (!(child instanceof HTMLElement)) continue;
-      const top = child.offsetTop;
-      const height = child.offsetHeight;
-      const forced = child.dataset.blockType === 'page-break';
-
-      const bottomOfPage = pageTop + usableHeight;
-
-      if (forced && top > pageTop) {
-        const push = bottomOfPage - top;
-        if (push > 0) child.style.setProperty('margin-top', `${push}px`);
-        pageTop = bottomOfPage;
-        continue;
-      }
-
-      if (top >= bottomOfPage) {
-        // Already past the boundary through sheer length.
-        pageTop = bottomOfPage;
-      } else if (top + height > bottomOfPage && height < usableHeight) {
-        // Would be split: push the whole block to the next page.
-        const push = bottomOfPage - top;
-        child.style.setProperty('margin-top', `${push}px`);
-        pageTop = bottomOfPage;
-      }
-    }
-
-    const totalHeight = this.flow.scrollHeight;
-    const count = Math.max(1, Math.ceil(totalHeight / usableHeight));
-    this.setPageCount(count);
+    const { starts } = paginateFlow(this.flow, usableHeight);
+    this.setPageCount(starts);
   }
 
   /**
@@ -301,15 +269,15 @@ export class PageView {
     return width > 0 ? width / this.geometry.widthMm : 0;
   }
 
-  private setPageCount(count: number): void {
-    const pxPerMm = this.pixelsPerMm();
+  private setPageCount(starts: number[]): void {
+    const count = starts.length;
     this.sheet.style.setProperty('--page-count', String(count));
     clear(this.boundaryLayer);
 
     for (let index = 1; index < count; index += 1) {
-      const usable = (this.geometry.heightMm - this.geometry.margins.top - this.geometry.margins.bottom) * index;
+      // Drawn exactly where the printer breaks, because it is the same figure.
       const boundary = el('div', { class: 'sheet__boundary' });
-      boundary.style.setProperty('top', `${(this.geometry.margins.top + usable) * pxPerMm}px`);
+      boundary.style.setProperty('top', `${starts[index]!}px`);
       boundary.append(el('span', { class: 'sheet__boundary-label', text: `Page ${index + 1}` }));
       this.boundaryLayer.append(boundary);
     }

@@ -970,7 +970,19 @@ export async function createDeskView(letterId: string): Promise<DeskView> {
   /* ------------------------------ Export ------------------------------ */
 
   function buildExportTray(host: HTMLElement): void {
-    host.append(el('p', { class: 'tray__hint', text: 'Every export is made on this device.' }));
+    host.append(
+      el('p', { class: 'tray__hint', text: 'Every export is made on this device.' }),
+      // Said plainly, because a file that quietly differs from the page is the
+      // sort of surprise that ruins a letter you only print once.
+      el('p', {
+        class: 'tray__hint',
+        text:
+          'Print gives you the page exactly as it looks here, with the stickers and the layout, ' +
+          'and your printer’s “Save as PDF” keeps the text selectable. ' +
+          'The PDF and PNG buttons below still use the older plain layout: the words are right, ' +
+          'but headings, stickers and paper designs are not carried across yet.',
+      }),
+    );
     const row = el('div', { class: 'chip-row' });
 
     const add = (label: string, run: () => Promise<void>): void => {
@@ -1045,7 +1057,23 @@ export async function createDeskView(letterId: string): Promise<DeskView> {
     const doc = cloneDocument(history.document);
     const activeId = activeBlockId();
     const index = activeId ? doc.blocks.findIndex((block) => block.id === activeId) : doc.blocks.length - 1;
-    const at = Math.max(0, index);
+    let at = Math.max(0, index);
+
+    // The "/query" the writer typed is the command, not part of the letter.
+    const host = doc.blocks[at];
+    if (host && 'inlines' in host) {
+      const text = host.inlines.map((inline) => inline.text).join('');
+      const trimmed = text.replace(/\/[\p{L}-]*\s*$/u, '');
+      if (trimmed !== text) {
+        if (trimmed.trim().length === 0 && doc.blocks.length > 1) {
+          // The line held nothing but the command: the new block takes its place.
+          doc.blocks.splice(at, 1);
+          at = Math.max(0, at - 1);
+        } else {
+          host.inlines = [{ text: trimmed, marks: [] }];
+        }
+      }
+    }
 
     const insert = (block: Block): void => {
       doc.blocks.splice(at + 1, 0, block);
@@ -1160,12 +1188,24 @@ export async function createDeskView(letterId: string): Promise<DeskView> {
   /* Keyboard                                                            */
   /* ------------------------------------------------------------------ */
 
+  // Capture, so the insert menu sees Enter before the page turns it into a new
+  // paragraph. Otherwise the command would run against the wrong line and leave
+  // the "/query" behind in the letter.
+  disposables.listen(
+    document,
+    'keydown',
+    (event) => {
+      const keyboard = event as KeyboardEvent;
+      if (slashMenu.handleKey(keyboard)) {
+        keyboard.preventDefault();
+        keyboard.stopPropagation();
+      }
+    },
+    { capture: true },
+  );
+
   disposables.listen(document, 'keydown', (event) => {
     const keyboard = event as KeyboardEvent;
-    if (slashMenu.handleKey(keyboard)) {
-      keyboard.preventDefault();
-      return;
-    }
     if (!(keyboard.ctrlKey || keyboard.metaKey)) return;
     const key = keyboard.key.toLowerCase();
     if (key === 's') {
@@ -1221,6 +1261,8 @@ export async function createDeskView(letterId: string): Promise<DeskView> {
 
   page.setDesign(letter);
   page.render(history.document);
+  // The count only fires on a change, so state the starting page count too.
+  pageCounter.textContent = '1 page';
   renderStatus(autosave.currentStatus);
   updateMeta();
   // Fit once the sheet has really been laid out, then keep fitting when the

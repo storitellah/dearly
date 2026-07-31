@@ -114,6 +114,31 @@ estimate otherwise, which is what lets pagination be unit-tested.
 a tiny stylesheet in `public/print/`, linked at print time. That keeps
 `style-src 'self'` intact — no inline `<style>` anywhere in the application.
 
+## Printing shares the page, not a copy of it
+
+`printing/document-print.ts` builds the print tree from `document/render.ts` —
+the same renderer the writing surface uses — and paginates it with
+`editor/wysiwyg/pagination.ts`, the same routine the writing surface uses. There
+is no second layout engine to drift out of step.
+
+Each printed page is a clipped window onto one continuous flow, shifted up by
+the pages already printed:
+
+```text
+.print-page                 physical sheet
+  └── .sheet--print         the letter's own paper, at true millimetre size
+        └── .sheet__window  the usable band; clips
+              └── .sheet__flow   the whole letter, margin-top: -(page start)
+```
+
+Two consequences worth knowing. The text stays real text, so the browser's
+"Save as PDF" produces selectable words. And the page breaks cannot disagree
+with the screen, because both come from the same numbers.
+
+`printing/layout.ts` — the older measured line layout — is still there and still
+used for a record with no document, which is what a letter imported from an
+older archive looks like before it is opened.
+
 ## Security boundaries
 
 There are exactly three places where untrusted data enters:

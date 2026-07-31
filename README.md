@@ -611,9 +611,12 @@ view is disposed.
 - **Letters do not sync between devices or browsers.** That is the trade for
   having no server. Move them with a `.dearly` backup.
 - **A forgotten password is final.** There is no recovery path, by design.
-- **PDF pages are rendered images**, not selectable text — the trade for having no
-  PDF dependency and no font embedding. Use the plain-text or HTML export when you
-  need selectable text.
+- **The PDF and PNG export buttons still use the older plain layout.** The words
+  are right, but headings, stickers and paper designs are not carried across, and
+  the pages are rendered images rather than selectable text. Printing does not
+  share this limitation: it renders the real page, and your printer's "Save as
+  PDF" gives a faithful file with selectable text. Rebuilding the file exports on
+  the document model is the next piece of work.
 - **Encryption needs a secure context** (`https://` or `localhost`).
 - **Printer scaling varies.** Use the Print check sheet before anything important.
 - **Safari does not always fire `afterprint`**, so the print tree is cleaned up on

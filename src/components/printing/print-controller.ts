@@ -9,6 +9,7 @@
 
 import { layoutLetter, type LayoutOptions } from './layout';
 import { renderLetterPages } from './print-render';
+import { renderDocumentPages } from './document-print';
 import { layoutEnvelope } from '../envelope/envelope-layout';
 import { renderEnvelopePage } from '../envelope/envelope-render';
 import { getPaper } from './paper';
@@ -124,26 +125,49 @@ export async function printLetter(
   };
   if (request.margins) layoutOptions.margins = request.margins;
 
-  const layout = layoutLetter(letter, layoutOptions);
   const root = ensurePrintRoot();
   const urls: string[] = [];
 
   try {
     const imageUrls = new Map<string, string>();
+    const photoUrls = new Map<string, string>();
+    const stickerUrls = new Map<string, string>();
     if (request.scope !== 'envelope') {
       for (const attachment of attachments) {
         const url = URL.createObjectURL(attachment.original);
         urls.push(url);
         imageUrls.set(attachment.id, url);
+        if (attachment.role === 'photo') photoUrls.set(attachment.id, url);
+        else stickerUrls.set(attachment.id, url);
       }
     }
 
     let pages = 0;
+    let letterPages = 0;
 
     if (request.scope !== 'envelope') {
-      root.append(renderLetterPages(layout, { imageUrls }, letter.envelope.size));
-      pages += layout.pages.length;
-      if (request.duplex && layout.pages.length % 2 === 1 && request.scope !== 'letter') {
+      // The document is the letter. The older line layout is kept for records
+      // that have none — a letter locked or imported before the page existed.
+      const useDocument = letter.doc.blocks.length > 0 || letter.doc.decorations.length > 0;
+
+      if (useDocument) {
+        const printed = renderDocumentPages(letter, letter.doc, {
+          photoUrls: request.includePhotographs ? photoUrls : new Map(),
+          stickerUrls,
+          showPageNumbers: request.showPageNumbers,
+          paperWidthMm: paper.widthMm,
+          paperHeightMm: paper.heightMm,
+        });
+        for (const page of printed.pages) root.append(page);
+        letterPages = printed.pages.length;
+      } else {
+        const layout = layoutLetter(letter, layoutOptions);
+        root.append(renderLetterPages(layout, { imageUrls }, letter.envelope.size));
+        letterPages = layout.pages.length;
+      }
+
+      pages += letterPages;
+      if (request.duplex && letterPages % 2 === 1 && request.scope !== 'letter') {
         // Keep the envelope on a fresh sheet when printing double-sided.
         const filler = document.createElement('section');
         filler.className = 'print-page print-page--blank';

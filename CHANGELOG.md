@@ -47,6 +47,15 @@ this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   writing prompt together.
 - A template gallery with true miniature previews — the same paper, palette and
   margins as the real thing, not stock images — plus filters and favourites.
+- **Printing the page itself.** Print now renders the document with the same
+  renderer and the same pagination routine the writing surface uses, so the
+  sheet that leaves the printer is the sheet that was on the screen: headings,
+  quotes, inline formatting, photographs, stickers, the paper design and the
+  page breaks. The text stays real text, so the printer's own "Save as PDF"
+  produces selectable, searchable words rather than a picture of them.
+- Pagination breaks between lines. A paragraph that fits on a page is never
+  split; a paragraph too long for any page is split between two of its own
+  lines rather than through the middle of one.
 
 ### Changed
 
@@ -90,6 +99,12 @@ this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   sideways, and the "Online" indicator only takes space when it has something
   worth saying.
 - Template miniatures spilled over the cards that framed them.
+- The page counter said "2 pages" for a one-line letter. It measured
+  `scrollHeight`, which the sheet's minimum height had already inflated to a
+  full page, so every letter was one page longer than it was.
+- A slash command left the `/heading` the writer typed sitting in the letter,
+  because the page turned Enter into a new paragraph before the insert menu saw
+  it. The menu now sees the key first, and the command text is removed.
 
 ### Fixed
 
