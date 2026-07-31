@@ -87,6 +87,8 @@ export interface AiAssistPanel {
 export function createAiAssistPanel(
   context: EditorContext,
   getSelection: () => { text: string; whole: boolean },
+  /** Puts an accepted suggestion into the letter. The caller decides where. */
+  insertSuggestion: (text: string) => void,
 ): AiAssistPanel {
   const panel = el('details', { class: 'panel panel--assist' });
   panel.append(el('summary', { class: 'panel__summary', text: 'Writing assistant (optional)' }));
@@ -210,8 +212,7 @@ export function createAiAssistPanel(
           text: 'Add to the end of my letter',
         });
         insert.addEventListener('click', () => {
-          const body = `${context.letter.body.trimEnd()}\n\n${suggestion}`.trimStart();
-          context.update({ body }, 'assist');
+          insertSuggestion(suggestion);
           toast('Added. Edit it into your own words.', 'success');
         });
         item.append(insert);

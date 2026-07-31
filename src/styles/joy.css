@@ -1,0 +1,497 @@
+/*
+ * The Dearly look: cut paper, tape, layered cards and colour.
+ *
+ * Everything here reads from the theme custom properties written by
+ * src/components/theme/themes.ts, so switching theme repaints the whole
+ * application instantly without reloading a stylesheet.
+ */
+
+:root {
+  --radius-lg: 22px;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --tape: rgba(255, 255, 255, 0.55);
+  --lift: 0 1px 2px rgba(20, 12, 8, 0.08), 0 10px 24px rgba(20, 12, 8, 0.1);
+  --lift-sm: 0 1px 2px rgba(20, 12, 8, 0.08), 0 4px 10px rgba(20, 12, 8, 0.07);
+  --wobble: -1.2deg;
+}
+
+body {
+  background-color: var(--background, #fff1f6);
+  color: var(--text, #4a1130);
+}
+
+/* A soft confetti wash behind everything, switched off with decorations. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--primary) 14%, transparent) 0 8px, transparent 9px),
+    radial-gradient(circle at 82% 26%, color-mix(in srgb, var(--accent) 14%, transparent) 0 6px, transparent 7px),
+    radial-gradient(circle at 68% 78%, color-mix(in srgb, var(--secondary) 12%, transparent) 0 10px, transparent 11px),
+    radial-gradient(circle at 24% 86%, color-mix(in srgb, var(--accent) 10%, transparent) 0 7px, transparent 8px);
+  background-size: 900px 900px;
+  opacity: 0.9;
+}
+
+:root[data-decorations="off"] body::before {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- chips */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.4rem 0.9rem;
+  border: 2px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.chip:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--primary);
+}
+
+.chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chip--primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.chip--accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.chip--active {
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+  border-color: var(--primary);
+}
+
+.chip--danger {
+  border-color: color-mix(in srgb, #b91c1c 60%, var(--line));
+  color: #b91c1c;
+}
+
+.chip--icon {
+  min-width: 44px;
+  padding: 0.4rem;
+  font-size: 1.05rem;
+}
+
+.chip--small {
+  min-height: 36px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+}
+
+.chip-row--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  scrollbar-width: thin;
+}
+
+/* ----------------------------------------------------------------- home */
+
+.home {
+  display: grid;
+  /* minmax(0, 1fr) so a wide child cannot stretch the column past the screen. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+}
+
+.home__hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 1.5rem;
+  align-items: center;
+  padding: clamp(1.2rem, 3vw, 2.4rem);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 16%, var(--surface)), var(--surface));
+  border: 3px solid color-mix(in srgb, var(--primary) 26%, transparent);
+  box-shadow: var(--lift);
+  overflow: hidden;
+}
+
+.home__eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.home__title {
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.8rem, 1.2rem + 3vw, 3.1rem);
+  line-height: 1.1;
+}
+
+.home__subtitle {
+  margin: 0;
+  max-width: 34rem;
+  color: var(--text-soft);
+}
+
+.home__actions {
+  display: grid;
+  /* min() keeps a single, full-width column on a narrow phone. */
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: 1rem;
+}
+
+.big-button {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.1rem 1.2rem;
+  min-height: 96px;
+  text-align: left;
+  border: 3px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  box-shadow: var(--lift-sm);
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.big-button:hover {
+  transform: translateY(-2px) rotate(-0.4deg);
+  box-shadow: var(--lift);
+}
+
+.big-button__title {
+  font-family: var(--font-letter);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.big-button__hint {
+  font-size: 0.88rem;
+  color: var(--text-soft);
+}
+
+.big-button--primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.big-button--primary .big-button__hint {
+  color: color-mix(in srgb, var(--on-primary) 82%, transparent);
+}
+
+.big-button--accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.big-button--accent .big-button__hint {
+  color: color-mix(in srgb, var(--on-accent) 84%, transparent);
+}
+
+/* Mailbox ---------------------------------------------------------- */
+
+.mailbox {
+  justify-self: center;
+  width: min(100%, 320px);
+}
+
+.mailbox__art {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.mailbox__post { fill: color-mix(in srgb, var(--text) 70%, transparent); }
+.mailbox__body { fill: var(--primary); }
+.mailbox__lid { fill: color-mix(in srgb, var(--primary) 70%, #000 0%); opacity: 0.85; }
+.mailbox__slot { fill: var(--surface); }
+.mailbox__flag { fill: var(--accent); transform-origin: 160px 66px; }
+.mailbox__envelope { fill: var(--surface); stroke: var(--secondary); stroke-width: 3; }
+
+.mailbox--animated .mailbox__flag { animation: flag-wave 4s ease-in-out infinite; }
+.mailbox--animated .mailbox__envelope--1 { animation: float-1 7s ease-in-out infinite; }
+.mailbox--animated .mailbox__envelope--2 { animation: float-2 9s ease-in-out infinite; }
+.mailbox--animated .mailbox__envelope--3 { animation: float-3 8s ease-in-out infinite; }
+
+@keyframes flag-wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-16deg); }
+}
+@keyframes float-1 {
+  0%, 100% { transform: translate(0, 0) rotate(-6deg); }
+  50% { transform: translate(6px, -10px) rotate(4deg); }
+}
+@keyframes float-2 {
+  0%, 100% { transform: translate(0, 0) rotate(5deg); }
+  50% { transform: translate(-8px, -12px) rotate(-4deg); }
+}
+@keyframes float-3 {
+  0%, 100% { transform: translate(0, 0) rotate(3deg); }
+  50% { transform: translate(10px, -8px) rotate(-6deg); }
+}
+
+:root[data-motion="reduced"] .mailbox--animated * { animation: none !important; }
+
+.home__section-title {
+  font-size: 1.05rem;
+  margin-bottom: 0.6rem;
+}
+
+.recent-row,
+.theme-strip,
+.sticker-strip {
+  display: flex;
+  gap: 0.7rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.recent-card {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 0.2rem;
+  min-width: 12rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius);
+  border: 2px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.recent-card__title { font-weight: 700; }
+.recent-card__meta { font-size: 0.8rem; color: var(--text-soft); }
+
+.theme-chip {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0.35rem 0.9rem 0.35rem 2.6rem;
+  position: relative;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.theme-chip::before {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: conic-gradient(var(--a) 0 33%, var(--b) 33% 66%, var(--c) 66% 100%);
+  border: 2px solid rgba(0, 0, 0, 0.12);
+}
+
+.sticker-strip__item {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+}
+
+@media (max-width: 52rem) {
+  .home__hero { grid-template-columns: 1fr; }
+  .mailbox { width: min(70%, 260px); }
+}
+
+/* ------------------------------------------------------- template gallery */
+
+.template-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  gap: 1.2rem;
+}
+
+.template-card {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.9rem;
+  /* A miniature is sized in millimetres; this makes certain it can never
+     spill over the card that frames it. */
+  overflow: hidden;
+  border-radius: var(--radius);
+  border: 3px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  background: var(--surface);
+  box-shadow: var(--lift-sm);
+}
+
+.template-card__name { margin: 0; font-size: 1.05rem; }
+.template-card__meta,
+.template-card__format { margin: 0; font-size: 0.8rem; color: var(--text-soft); }
+.template-card__palette { display: flex; gap: 0.25rem; }
+.palette-dot { width: 1rem; height: 1rem; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); }
+.template-card__actions { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.3rem; }
+
+.template-filters { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; margin-bottom: 1rem; }
+
+/* A true miniature of the paper, not a stock image. */
+.mini-page {
+  position: relative;
+  width: var(--mini-width);
+  height: var(--mini-height);
+  background-color: var(--paper-colour);
+  border-radius: 2px;
+  box-shadow: var(--lift-sm);
+  overflow: hidden;
+  justify-self: center;
+}
+
+.mini-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--paper-pattern);
+  background-size: var(--paper-pattern-size);
+  opacity: var(--paper-pattern-opacity);
+}
+
+.mini-page[data-border="hairline"]::after,
+.mini-page[data-border="double"]::after,
+.mini-page[data-border="dashed"]::after,
+.mini-page[data-border="deckled"]::after,
+.mini-page[data-border="rounded"]::after,
+.mini-page[data-border="scallop"]::after {
+  content: "";
+  position: absolute;
+  inset: 3mm;
+  border: 0.3mm solid var(--border-colour);
+}
+.mini-page[data-border="dashed"]::after,
+.mini-page[data-border="deckled"]::after { border-style: dashed; }
+.mini-page[data-border="rounded"]::after,
+.mini-page[data-border="scallop"]::after { border-radius: 3mm; }
+
+.mini-page__lines {
+  position: absolute;
+  inset: 0;
+  padding: var(--mini-margin);
+  display: grid;
+  align-content: start;
+  gap: 1.6mm;
+  color: var(--paper-ink);
+}
+
+.mini-page__heading,
+.mini-page__sign { font-size: 6pt; opacity: 0.85; }
+.mini-page__sign { margin-top: 2mm; }
+.mini-page__line { height: 0.9mm; border-radius: 1mm; background: currentColor; opacity: 0.25; }
+.mini-page__sticker { position: absolute; right: 3mm; bottom: 3mm; width: 10mm; height: 10mm; }
+
+.template-preview__stage { display: grid; place-items: center; min-height: 16rem; overflow: auto; }
+.template-preview__fold { transform: perspective(700px) rotateX(18deg); }
+.template-preview__phone { padding: 0.6rem; border: 6px solid var(--text); border-radius: 22px; }
+
+.envelope-mini {
+  position: relative;
+  width: 220px;
+  height: 130px;
+  border-radius: 4px;
+  background: var(--envelope);
+  box-shadow: var(--lift-sm);
+  display: grid;
+  place-items: center;
+}
+.envelope-mini__flap {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 62px;
+  background: var(--lining);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.envelope-mini__address { position: absolute; bottom: 26px; font-size: 0.75rem; color: var(--ink); }
+.envelope-mini__seal { position: absolute; bottom: 8px; width: 26px; height: 26px; border-radius: 50%; }
+.envelope-mini__seal--ribbon { width: 70px; height: 10px; border-radius: 3px; }
+.envelope-mini__seal--sticker { border-radius: 4px; }
+
+/* --------------------------------------------------------- sticker studio */
+
+.sticker-card {
+  position: relative;
+  display: grid;
+  gap: 0.3rem;
+  place-items: center;
+  margin: 0;
+  padding: 0.7rem 0.5rem 0.5rem;
+  border-radius: var(--radius);
+  border: 2px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  background: var(--surface);
+}
+
+.sticker-card svg { width: 64px; height: 64px; }
+.sticker-card__name { font-size: 0.78rem; text-align: center; color: var(--text-soft); }
+.sticker-card__actions { display: flex; gap: 0.3rem; align-items: center; }
+.sticker-card__star {
+  min-width: 36px;
+  min-height: 36px;
+  border: 0;
+  background: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text-soft);
+}
+.sticker-card__star--on { color: var(--accent); }
+
+.studio-panel {
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 2px dashed color-mix(in srgb, var(--primary) 30%, transparent);
+  background: var(--surface);
+}
+
+.maker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: start; }
+.maker__canvas {
+  width: min(220px, 40vw);
+  height: auto;
+  border-radius: var(--radius);
+  background:
+    repeating-conic-gradient(#00000010 0% 25%, transparent 0% 50%) 50% / 16px 16px;
+}
+
+@media (max-width: 44rem) {
+  .maker { grid-template-columns: 1fr; }
+  .maker__canvas { justify-self: center; }
+}

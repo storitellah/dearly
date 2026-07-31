@@ -64,14 +64,44 @@ So Dearly is deliberately small and self-contained:
 
 ## Features
 
-**Writing**
+**Writing — you write on the page itself**
 
-- A distraction-light writing view with word count, reading time and live page count
-- Eight stationery designs: laid, ruled, linen, airmail, botanical, grid, kraft, midnight
-- Typeface, size, line spacing, alignment and ink colour, all measured for print
+There is no text box beside a preview. The page *is* the editor: you type
+directly onto paper drawn at true millimetre size, and what you see on screen is
+the arrangement that comes out of the printer.
+
+- One continuous writing surface with automatic pagination — a paragraph that
+  would be cut in half by a page boundary moves to the next page instead
+- A formatting toolbar that floats beside the selection on a desktop and rises
+  from the bottom of the screen on a phone
+- Slash commands (`/heading`, `/quote`, `/photo`, `/sticker`, `/page-break`, and
+  eleven more) for people who would rather not reach for a toolbar
+- Stickers and photographs placed on the writing surface, dragged, resized,
+  rotated, flipped, layered behind or in front of the text, and nudged with the
+  arrow keys — with a finger, a stylus or a mouse
+- One undo history for everything: typing, formatting, stickers, photographs and
+  template changes all share a single stack
+- Paste is sanitised: rich text keeps bold, italics and links, everything else is
+  reduced to plain text, and Shift+paste is always plain
+- Focus mode dims the surroundings without replacing the real page
 - Writing prompts by occasion, for when the first line will not come
 - Recipient, sender, place, date written, planned sending date, opening date,
   occasion, status and tags
+
+**Looking the part**
+
+- Twelve colour themes — Sunshine Yellow, Bubblegum Pink, Sky Blue, Mint Green,
+  Lavender Dream, Orange Pop, Cherry Red, Ocean Teal, Rainbow Mix, Sunset Glow,
+  Forest Green and Midnight Sparkle — switched instantly, with every text
+  and background pair checked against WCAG 2.2 AA contrast in the test suite
+- Fifty-four letter templates across seven categories, each carrying paper,
+  typography, margins, palette, sticker suggestions and an envelope — and all of
+  it editable the moment you start writing
+- Fifteen paper designs, drawn with CSS gradients rather than image files, so
+  they cost nothing to download and print sharply at any size
+- Over a hundred stickers in thirty-two categories, drawn as vectors and
+  rasterised at whatever resolution the export needs, plus a sticker maker and
+  validated PNG/JPEG/WebP uploads of your own
 
 **Keeping**
 
@@ -502,7 +532,12 @@ public/            copied verbatim into dist/
 src/
   components/
     accessibility/ focus, dialogs, announcements, motion
-    editor/        the writing view, autosave, panels, AI assist
+    document/      the letter document model, rendering, parsing, paste, history
+    editor/        the letter desk, autosave, AI assist
+      wysiwyg/     the page you type on, formatting bar, slash menu, decorations
+    stickers/      sticker shapes, library and rasterising
+    templates/     paper designs and letter templates
+    theme/         the twelve colour themes and contrast checking
     envelope/      envelope layout and rendering
     export/        PDF, images, text, HTML, archives, downloads
     printing/      pagination, measurement, print DOM, calibration
@@ -513,7 +548,8 @@ src/
     storage/       IndexedDB, repositories, migrations, quota, preferences
     ui/            shell, router, library, settings, privacy, toasts
     utilities/     DOM, bytes, dates, events, ids
-  styles/          base, layout, components, editor, library, stationery, print
+  styles/          base, layout, components, joy, desk, editor, library,
+                   stationery, print
   app.ts, main.ts
 functions/         optional Cloudflare Pages Functions
 scripts/           asset generation, service-worker build
@@ -527,11 +563,19 @@ docs/              print testing, browser testing, architecture, data model
 npm test
 ```
 
-139 tests cover creating, editing, autosaving, recovering, deleting, locking,
+187 tests cover creating, editing, autosaving, recovering, deleting, locking,
 encrypting, decrypting, exporting, importing, rejecting dangerous backups,
 multi-page pagination, stationery, photographs, offline strategy, service-worker
 updates, keyboard navigation, reduced motion, preferences and storage-quota
 errors.
+
+The redesign added a further set: every theme's text and background pairs are
+checked against WCAG 2.2 AA contrast, the document model is round-tripped
+through the DOM and back, hostile markup is fed to the parser and the paste
+handler, every sticker is checked for a drawable shape and for hex-only colour
+substitution, all fifty-four templates are checked for complete definitions, and
+the deployment tests assert that no responsive grid can grow wider than the
+phone it is on.
 
 Browser and print checks that a test runner cannot do are written down instead:
 `docs/browser-testing.md` and `docs/print-testing.md`.
@@ -542,10 +586,16 @@ Measured on the production build:
 
 | Metric | Budget | Actual |
 | --- | --- | --- |
-| Initial JS (gzipped) | ≤ 60 kB | ~43 kB |
-| Initial CSS (gzipped) | ≤ 12 kB | ~6 kB |
+| Initial JS (gzipped) | ≤ 80 kB | ~68 kB |
+| Initial CSS (gzipped) | ≤ 12 kB | ~10 kB |
 | Runtime dependencies | 0 | 0 |
 | Export/print code on first load | none | loaded on demand |
+
+The JavaScript budget was 60 kB before the 2.0 redesign. It was raised to 80 kB
+deliberately, to pay for twelve themes, fifty-four templates, over a hundred
+vector stickers and the document model behind the editor — all of which ship as
+data and code rather than as downloaded images. Nothing was added that the
+application does not use, and there are still no runtime dependencies.
 
 Stationery textures and sounds are fetched only when first used. Photographs are
 downscaled for the screen and kept at print quality separately, so a library
@@ -561,9 +611,12 @@ view is disposed.
 - **Letters do not sync between devices or browsers.** That is the trade for
   having no server. Move them with a `.dearly` backup.
 - **A forgotten password is final.** There is no recovery path, by design.
-- **PDF pages are rendered images**, not selectable text — the trade for having no
-  PDF dependency and no font embedding. Use the plain-text or HTML export when you
-  need selectable text.
+- **The PDF and PNG export buttons still use the older plain layout.** The words
+  are right, but headings, stickers and paper designs are not carried across, and
+  the pages are rendered images rather than selectable text. Printing does not
+  share this limitation: it renders the real page, and your printer's "Save as
+  PDF" gives a faithful file with selectable text. Rebuilding the file exports on
+  the document model is the next piece of work.
 - **Encryption needs a secure context** (`https://` or `localhost`).
 - **Printer scaling varies.** Use the Print check sheet before anything important.
 - **Safari does not always fire `afterprint`**, so the print tree is cleaned up on

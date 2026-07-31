@@ -2,15 +2,21 @@
  * Locking and unlocking individual letters.
  *
  * A locked letter keeps only what the library needs to show a card: its id,
- * title, category, status, timestamps and print counters. Everything else — body,
- * recipient, sender, location, tags, signature and the photographs themselves —
- * is moved inside an AES-GCM envelope, and the plaintext copies are removed from
- * IndexedDB in the same operation.
+ * title, category, status, timestamps and print counters. Everything else — the
+ * document, the plain-text mirror, recipient, sender, location, tags, signature
+ * and the photographs themselves — is moved inside an AES-GCM envelope, and the
+ * plaintext copies are removed from IndexedDB in the same operation.
  */
 
 import { decryptString, encryptString, type CryptoEnvelope } from './crypto';
 import type { AttachmentMeta, LetterRecord, LockedPayload } from '../storage/schema';
 import { normaliseLetter } from '../storage/schema';
+import {
+  documentFromPlainText,
+  emptyDocument,
+  normaliseDocument,
+  type LetterDocument,
+} from '../document/model';
 import {
   deleteAttachmentsForLetter,
   getAttachmentsForLetter,
@@ -20,8 +26,11 @@ import {
 import { base64ToBlob, blobToBase64 } from '../utilities/bytes';
 
 interface LockedContents {
-  version: 1;
+  /** 1: written before the document model existed. 2: carries `doc` as well. */
+  version: 1 | 2;
   body: string;
+  /** Absent in version 1 payloads, where the words lived only in `body`. */
+  doc?: LetterDocument;
   recipient: string;
   sender: string;
   senderLocation: string;
@@ -71,8 +80,9 @@ export async function lockLetter(
   const stored = attachments ?? (await getAttachmentsForLetter(letter.id));
 
   const contents: LockedContents = {
-    version: 1,
+    version: 2,
     body: letter.body,
+    doc: letter.doc,
     recipient: letter.recipient,
     sender: letter.sender,
     senderLocation: letter.senderLocation,
@@ -105,6 +115,9 @@ export async function lockLetter(
   return {
     ...letter,
     body: '',
+    // The document is where the words actually live. Leaving it behind would
+    // make the encryption decorative.
+    doc: emptyDocument(),
     recipient: '',
     sender: '',
     senderLocation: '',
@@ -164,9 +177,16 @@ export async function unlockLetter(
     attachments.push(meta);
   }
 
+  // A version 1 payload predates the document model: rebuild the page from the
+  // plain text that was locked away, rather than returning an empty letter.
+  const doc = contents.doc
+    ? normaliseDocument(contents.doc)
+    : documentFromPlainText(contents.body ?? '');
+
   return normaliseLetter({
     ...letter,
     body: contents.body ?? '',
+    doc,
     recipient: contents.recipient ?? '',
     sender: contents.sender ?? '',
     senderLocation: contents.senderLocation ?? '',

@@ -5,6 +5,8 @@
  */
 
 import './styles/base.css';
+import './styles/joy.css';
+import './styles/desk.css';
 import './styles/layout.css';
 import './styles/components.css';
 import './styles/editor.css';

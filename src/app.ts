@@ -11,7 +11,11 @@ import { createLibraryView } from './components/ui/library-view';
 import { createSettingsView } from './components/ui/settings-view';
 import { createPrivacyView } from './components/ui/privacy-view';
 import { createCalibrationView } from './components/ui/calibration-view';
-import { createEditorView, type EditorView } from './components/editor/editor-view';
+import { createDeskView, type DeskView } from './components/editor/desk-view';
+import { createHomeView } from './components/ui/home-view';
+import { createTemplatesView } from './components/ui/templates-view';
+import { createStickerStudioView } from './components/ui/sticker-studio-view';
+import { applyTheme, getTheme } from './components/theme/themes';
 import { createLetter } from './components/storage/schema';
 import { putLetter, listLetters } from './components/storage/letters-repo';
 import { getPreferences } from './components/storage/preferences';
@@ -49,6 +53,7 @@ export async function startApp(container: HTMLElement): Promise<void> {
   applyPreferences();
   watchSystemPreferences();
   setCanonicalUrls();
+  applyTheme(getTheme(getPreferences().lastThemeId));
 
   const shell: Shell = buildShell();
   clear(container);
@@ -87,7 +92,21 @@ export async function startApp(container: HTMLElement): Promise<void> {
             await openMostRecentOrNew();
             return;
           }
-          const view: EditorView = await createEditorView(route.id);
+          const view: DeskView = await createDeskView(route.id);
+          active = view;
+          break;
+        }
+        case 'templates': {
+          active = createTemplatesView();
+          break;
+        }
+        case 'stickers': {
+          active = createStickerStudioView();
+          break;
+        }
+        case 'home': {
+          const view = createHomeView();
+          await view.refresh();
           active = view;
           break;
         }

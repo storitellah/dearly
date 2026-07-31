@@ -16,6 +16,9 @@ import { layoutEnvelope } from '../src/components/envelope/envelope-layout';
 import { renderEnvelopePage } from '../src/components/envelope/envelope-render';
 import { buildCalibrationPage } from '../src/components/printing/calibration';
 import { getStationery } from '../src/components/stationery/stationery';
+import { paginateFlow } from '../src/components/editor/wysiwyg/pagination';
+import { renderDocumentPages } from '../src/components/printing/document-print';
+import { textBlock } from '../src/components/document/model';
 import { sampleLetter } from './helpers';
 
 beforeAll(() => {
@@ -396,5 +399,87 @@ describe('envelopes', () => {
   it('converts millimetres to points for PDF geometry', () => {
     expect(mmToPt(210)).toBeCloseTo(595.28, 1);
     expect(mmToPt(297)).toBeCloseTo(841.89, 1);
+  });
+});
+
+describe('printing the page itself', () => {
+  it('keeps every page inside one usable band', () => {
+    // jsdom has no layout, so this exercises the shape of the result rather
+    // than real measurements: a flow it cannot measure must still be one page,
+    // never zero and never an infinite loop.
+    const flow = document.createElement('article');
+    for (let index = 0; index < 3; index += 1) {
+      flow.append(document.createElement('p'));
+    }
+
+    const pagination = paginateFlow(flow, 900);
+    expect(pagination.starts).toHaveLength(pagination.heights.length);
+    expect(pagination.starts.length).toBeGreaterThanOrEqual(1);
+    expect(Math.max(...pagination.heights)).toBeLessThanOrEqual(900);
+  });
+
+  it('refuses to produce pages from an unusable band', () => {
+    const flow = document.createElement('article');
+    flow.append(document.createElement('p'));
+    expect(paginateFlow(flow, 0).starts).toEqual([0]);
+    expect(paginateFlow(flow, -10).starts).toEqual([0]);
+  });
+
+  it('treats an empty flow as a single page', () => {
+    expect(paginateFlow(document.createElement('article'), 900).starts).toEqual([0]);
+  });
+
+  it('renders the document, not the plain-text mirror', () => {
+    const letter = {
+      ...sampleLetter(),
+      doc: {
+        version: 1,
+        blocks: [
+          textBlock('heading', 'The shed roof'),
+          textBlock('paragraph', 'It survived the storm.'),
+        ],
+        decorations: [
+          {
+            id: 'dec_1',
+            kind: 'sticker' as const,
+            stickerId: 'heart',
+            colours: [],
+            page: 0,
+            xMm: 100,
+            yMm: 120,
+            widthMm: 20,
+            heightMm: 20,
+            rotation: 0,
+            opacity: 1,
+            flipped: false,
+            locked: false,
+            layer: 5,
+          },
+        ],
+      },
+    };
+
+    const result = renderDocumentPages(letter, letter.doc, {
+      photoUrls: new Map(),
+      stickerUrls: new Map(),
+      showPageNumbers: true,
+      paperWidthMm: 210,
+      paperHeightMm: 297,
+    });
+
+    expect(result.pages.length).toBeGreaterThanOrEqual(1);
+    const first = result.pages[0]!;
+
+    // Structure the plain-text mirror could not carry.
+    expect(first.querySelector('.lb--heading')?.textContent).toBe('The shed roof');
+    expect(first.textContent).toContain('It survived the storm.');
+    // Real text, never a picture of it.
+    expect(first.querySelector('canvas')).toBeNull();
+    // Nothing on paper may still look editable.
+    expect(first.querySelector('[contenteditable="true"]')).toBeNull();
+    // The sticker travels with the letter.
+    expect(first.querySelector('[data-decoration]')).not.toBeNull();
+    // And the measuring sheet is never left behind in the document.
+    expect(document.querySelectorAll('.print-measure')).toHaveLength(0);
   });
 });

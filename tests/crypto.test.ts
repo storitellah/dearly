@@ -12,6 +12,7 @@ import {
 import { lockLetter, unlockLetter, canUnlock } from '../src/components/security/letter-lock';
 import { putLetter, getLetter } from '../src/components/storage/letters-repo';
 import { getAttachmentsForLetter, putAttachment } from '../src/components/storage/attachments-repo';
+import { documentFromPlainText, documentText } from '../src/components/document/model';
 import { freshDatabase, sampleAttachment, sampleLetter } from './helpers';
 
 const PASSWORD = 'a quiet green door';
@@ -112,6 +113,66 @@ describe('locking a letter', () => {
     // The title stays readable so the memory box can still list it.
     expect(stored?.title).toBe('For Nan');
     expect(JSON.stringify(stored)).not.toContain('The garden is doing what you said');
+  });
+
+  it('encrypts the document, where the words actually live', async () => {
+    // The plain-text `body` is only a mirror. If locking cleared it and left
+    // `doc` behind, every word would still be sitting in IndexedDB.
+    const letter = await putLetter({
+      ...sampleLetter(),
+      doc: documentFromPlainText('The garden is doing what you said it would.'),
+    });
+
+    const locked = await putLetter(await lockLetter(letter, PASSWORD));
+    const stored = await getLetter(letter.id);
+
+    expect(documentText(stored!.doc)).not.toContain('The garden is doing what you said');
+    expect(JSON.stringify(stored)).not.toContain('The garden is doing what you said');
+
+    const unlocked = await unlockLetter(locked, PASSWORD);
+    expect(documentText(unlocked.doc)).toContain('The garden is doing what you said');
+  });
+
+  it('rebuilds the page from a letter locked before the document model existed', async () => {
+    // A version 1 payload has no `doc`. Unlocking must not hand back a blank
+    // page just because the letter is old.
+    const letter = await putLetter(sampleLetter());
+    const locked = await putLetter(await lockLetter(letter, PASSWORD));
+
+    const legacyPayload = JSON.parse(
+      JSON.stringify({ ...locked.locked }),
+    ) as NonNullable<typeof locked.locked>;
+    const contents = JSON.parse(
+      await decryptString(
+        {
+          version: legacyPayload.version,
+          algorithm: legacyPayload.algorithm,
+          keyDerivation: legacyPayload.keyDerivation,
+          iterations: legacyPayload.iterations,
+          saltBase64: legacyPayload.saltBase64,
+          ivBase64: legacyPayload.ivBase64,
+          cipherTextBase64: legacyPayload.cipherTextBase64,
+        },
+        PASSWORD,
+      ),
+    ) as Record<string, unknown>;
+    delete contents.doc;
+    contents.version = 1;
+    const reEncrypted = await encryptString(JSON.stringify(contents), PASSWORD);
+
+    const legacy = {
+      ...locked,
+      locked: {
+        ...legacyPayload,
+        saltBase64: reEncrypted.saltBase64,
+        ivBase64: reEncrypted.ivBase64,
+        cipherTextBase64: reEncrypted.cipherTextBase64,
+        iterations: reEncrypted.iterations,
+      },
+    };
+
+    const unlocked = await unlockLetter(legacy, PASSWORD);
+    expect(documentText(unlocked.doc)).toContain('The garden is doing what you said');
   });
 
   it('restores everything, including photographs, with the right password', async () => {

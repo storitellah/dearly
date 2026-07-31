@@ -8,6 +8,7 @@
  *  - Every migration step is pure and independently testable.
  */
 
+import { documentFromPlainText } from '../document/model';
 import {
   CURRENT_SCHEMA_VERSION,
   normaliseLetter,
@@ -56,8 +57,36 @@ const stepV1toV2: Step = (raw) => {
   return next;
 };
 
+/**
+ * v2 → v3: letters became structured documents. The plain-text body is turned
+ * into blocks — greeting, paragraphs, closing, signature — so nothing anyone
+ * wrote in an earlier version is lost or flattened, and `body` is kept in step
+ * as the plain-text view of the same content.
+ */
+const stepV2toV3: Step = (raw) => {
+  const next = { ...raw };
+  if (next.doc === undefined || next.doc === null) {
+    const body = typeof next.body === 'string' ? next.body : '';
+    const signature = next.signature as { name?: unknown; closing?: unknown } | undefined;
+    next.doc = documentFromPlainText(body, {
+      recipient: typeof next.recipient === 'string' ? next.recipient : '',
+      closing: typeof signature?.closing === 'string' ? signature.closing : '',
+      signature: typeof signature?.name === 'string' ? signature.name : '',
+      meta: [typeof next.senderLocation === 'string' ? next.senderLocation : '']
+        .filter((part) => part.length > 0)
+        .join(' · '),
+    });
+  }
+  if (typeof next.templateId !== 'string') next.templateId = 'love-notes';
+  if (typeof next.themeId !== 'string') next.themeId = 'bubblegum-pink';
+  if (typeof next.paperSize !== 'string') next.paperSize = 'a4';
+  next.schemaVersion = 3;
+  return next;
+};
+
 const STEPS: Record<number, Step> = {
   1: stepV1toV2,
+  2: stepV2toV3,
 };
 
 export function migrateLetter(input: unknown): MigrationOutcome {

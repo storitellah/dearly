@@ -86,3 +86,93 @@
     margin-bottom: 12px;
   }
 }
+
+/*
+ * Printing the page itself.
+ *
+ * `.sheet--print` is the same sheet the writer types on, with the editing
+ * affordances removed. Each page is a clipped window onto one continuous flow,
+ * so the text stays real text — a browser "Save as PDF" produces selectable,
+ * searchable words rather than a picture of them.
+ */
+
+.print-measure {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 210mm;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.sheet--print {
+  position: relative;
+  width: var(--page-width);
+  overflow: hidden;
+  transform: none;
+  box-shadow: none;
+  background-color: var(--paper-colour);
+}
+
+/*
+ * The window is the usable band of the page — inside the top and bottom
+ * margins — and it clips. Without the inset, each page would show a margin's
+ * worth of the next page's text sitting in its own bottom margin.
+ */
+.sheet--print .sheet__window {
+  position: absolute;
+  top: var(--margin-top);
+  /* Height is set from the measured band; the margin box is the fallback. */
+  bottom: var(--margin-bottom);
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+.sheet--print .sheet__window[style*="height"] {
+  bottom: auto;
+}
+
+.sheet--print .sheet__flow {
+  min-height: 0;
+}
+
+.sheet--print .sheet__decorations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.print-page--document {
+  position: relative;
+  display: grid;
+  place-items: start center;
+  overflow: hidden;
+}
+
+.print-page__number {
+  position: absolute;
+  right: 8mm;
+  bottom: 6mm;
+  font-size: 8pt;
+  color: color-mix(in srgb, var(--paper-ink, #2b2118) 60%, transparent);
+}
+
+@media print {
+  .print-measure {
+    display: none !important;
+  }
+
+  .sheet--print,
+  .sheet--print * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Nothing on a printed page may hint that it was editable. */
+  .sheet--print [data-placeholder]::before,
+  .sheet--print .sheet__boundaries,
+  .sheet--print .deco-handles {
+    display: none !important;
+  }
+}

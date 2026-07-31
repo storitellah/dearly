@@ -6,7 +6,16 @@
  * wire. No personal data appears in a route — only opaque identifiers.
  */
 
-export type RouteName = 'library' | 'write' | 'settings' | 'privacy' | 'print-check' | 'about';
+export type RouteName =
+  | 'home'
+  | 'library'
+  | 'write'
+  | 'templates'
+  | 'stickers'
+  | 'settings'
+  | 'privacy'
+  | 'print-check'
+  | 'about';
 
 export interface Route {
   name: RouteName;
@@ -15,7 +24,10 @@ export interface Route {
 }
 
 const NAMES = new Set<RouteName>([
+  'home',
   'library',
+  'templates',
+  'stickers',
   'write',
   'settings',
   'privacy',
@@ -25,11 +37,11 @@ const NAMES = new Set<RouteName>([
 
 export function parseRoute(hash: string): Route {
   const clean = hash.replace(/^#\/?/, '').trim();
-  if (clean.length === 0) return { name: 'library', id: null };
+  if (clean.length === 0) return { name: 'home', id: null };
 
   const [rawName, rawId] = clean.split('/');
   const name = (rawName ?? '') as RouteName;
-  if (!NAMES.has(name)) return { name: 'library', id: null };
+  if (!NAMES.has(name)) return { name: 'home', id: null };
 
   const id = rawId && /^[a-z]{2,8}_[0-9a-f]{8,64}$/.test(rawId) ? rawId : null;
   return { name, id };
